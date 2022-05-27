@@ -1,3 +1,9 @@
+class HomeworkExceptionError(Exception):
+    """Ошибка в данных по ключу homework"""
+
+    pass
+
+
 class StatusCodeError(Exception):
     """Некорректный статус ответа сервера."""
 
@@ -7,23 +13,4 @@ class StatusCodeError(Exception):
 class RequestError(Exception):
     """Некорректный запрос."""
 
-    pass
-
-
-class ResponseAnswerStatusError(Exception):
-    """Ошибка в статусе ответа."""
-
-    pass
-
-
-class HomeworkExceptionError(Exception):
-    """Ошибка в данных по ключу homework"""
-
-    pass
-
-class ErrorApi(Exception):
-    pass
-
-
-class ResponseJsonError(Exception):
     pass
