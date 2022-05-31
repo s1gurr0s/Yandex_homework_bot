@@ -1,5 +1,5 @@
-class HomeworkExceptionError(Exception):
-    """Ошибка в данных по ключу homework"""
+class SendMessageError(Exception):
+    """Ошибка при отправке сообщения в чат."""
 
     pass
 
@@ -10,7 +10,7 @@ class StatusCodeError(Exception):
     pass
 
 
-class RequestError(Exception):
-    """Некорректный запрос."""
-
+class ResponseError(Exception):
+    """Ошибка в ответе сервера."""
+    
     pass
