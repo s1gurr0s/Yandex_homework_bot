@@ -49,7 +49,7 @@ TOKEN_ERROR = 'Отсутствует или некорректна переме
 NO_TOKEN_ERROR = 'Отсутствует переменная(-ные)'
 NEXT_CHECK = 'Нет изменений, повторная проверка через 10 минут'
 RUNTIME_ERROR = 'Сбой в работе программы: {error}'
-SEND_MESSAGE_SUCCESSFUL = 'Сообщение {message} успешно отправлено'
+MESSAGE_READY_TO_SEND = 'Сообщение {message} готово к отправке'
 
 
 def send_message(bot, message):
@@ -57,8 +57,7 @@ def send_message(bot, message):
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
     except Exception as error:
-        raise SendMessageError(
-            SEND_MESSAGE_ERROR.format(error=error, message=message))
+        logging.error(SEND_MESSAGE_ERROR.format(error=error, message=message))
 
 
 def get_api_answer(timestamp):
@@ -123,7 +122,7 @@ def check_tokens():
     """Проверка токенов."""
     check_tokens = [logging.critical(TOKEN_ERROR.format(token=token))
                     for token in TOKENS if globals()[token] is None]
-    return not bool(check_tokens)
+    return not check_tokens
 
 
 def main():
@@ -140,7 +139,7 @@ def main():
             homeworks = check_response(response)
             if homeworks:
                 message = parse_status(homeworks[0])
-                logging.info(SEND_MESSAGE_SUCCESSFUL.format(message=message))
+                logging.info(MESSAGE_READY_TO_SEND.format(message=message))
                 send_message(bot, message)
                 current_timestamp = response.get(
                     'current_date', current_timestamp)
