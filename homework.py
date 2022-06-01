@@ -7,7 +7,7 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
-from exceptions import ResponseError, SendMessageError, StatusCodeError
+from exceptions import ResponseError, StatusCodeError
 
 load_dotenv()
 
