@@ -49,7 +49,7 @@ TOKEN_ERROR = 'Отсутствует или некорректна переме
 NO_TOKEN_ERROR = 'Отсутствует переменная(-ные)'
 NEXT_CHECK = 'Нет изменений, повторная проверка через 10 минут'
 RUNTIME_ERROR = 'Сбой в работе программы: {error}'
-SEND_MESSAGE_SUCCESSFULL = 'Сообщение {message} успешно отправлено'
+SEND_MESSAGE_SUCCESSFULL = 'Сообщение успешно отправлено'
 
 
 def send_message(bot, message):
