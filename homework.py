@@ -49,15 +49,18 @@ TOKEN_ERROR = 'Отсутствует или некорректна переме
 NO_TOKEN_ERROR = 'Отсутствует переменная(-ные)'
 NEXT_CHECK = 'Нет изменений, повторная проверка через 10 минут'
 RUNTIME_ERROR = 'Сбой в работе программы: {error}'
-SEND_MESSAGE_SUCCESSFULL = 'Сообщение успешно отправлено'
+SEND_MESSAGE_SUCCESSFULL = 'Сообщение {message} успешно отправлено в Telegram'
 
 
 def send_message(bot, message):
     """Отправка сообщения в чат."""
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
+        logging.info(SEND_MESSAGE_SUCCESSFULL.format(message=message))
+        return True
     except Exception as error:
         logging.error(SEND_MESSAGE_ERROR.format(error=error, message=message))
+        return False
 
 
 def get_api_answer(timestamp):
@@ -132,20 +135,22 @@ def main():
         raise ValueError(NO_TOKEN_ERROR)
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
+    errors = ''
     while True:
         try:
             response = get_api_answer(current_timestamp)
             homeworks = check_response(response)
             if homeworks:
-                send_message(bot, parse_status(homeworks[0]))
-                logging.info(SEND_MESSAGE_SUCCESSFULL)
-            current_timestamp = response.get(
-                'current_date', current_timestamp)
+                if send_message(bot, parse_status(homeworks[0])):
+                    current_timestamp = response.get(
+                        'current_date', current_timestamp)
             logging.info(NEXT_CHECK)
         except Exception as error:
             message = RUNTIME_ERROR.format(error=error)
             logging.error(message)
-            send_message(bot, message)
+            if message != errors:
+                if send_message(bot, message):
+                    errors = message
         time.sleep(RETRY_TIME)
 
 
