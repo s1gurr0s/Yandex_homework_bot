@@ -35,8 +35,10 @@ CONNECTION_ERROR = ('Ошибка {error} выполнения GET-запрос�
 STATUS_CODE_ERROR = ('Эндпоинт {url} недоступен. '
                      'Код ответа API: {response}. Токен авторизации: '
                      '{headers}, временная метка: {params}')
-RESPONSE_ERROR = ('Ошибка {error} в ответе сервера. Эндпоинт: {url}, '
-                  'токен авторизации: {headers}, временная метка: {params}')
+RESPONSE_ERROR = ('Ошибка {error} в ответе сервера. '
+                  'Содержимое: {error_detail}. '
+                  'Эндпоинт: {url}, токен авторизации: {headers}, '
+                  'временная метка: {params}')
 RESPONSE_TYPE_ERROR = ('В ответе пришёл не словарь, а {type}')
 KEY_ERROR = 'Отсутсвует ключ homeworks'
 HOMEWORKS_TYPE_ERROR = ('Домашние задания в виде {type}, а не списка')
@@ -45,8 +47,9 @@ STATUS_DETAIL = ('Изменился статус проверки работы 
                  '\n\n{verdict}')
 TOKEN_ERROR = 'Отсутствует или некорректна переменная: {token}'
 NO_TOKEN_ERROR = 'Отсутствует переменная(-ные)'
-NO_CHANGES = 'Нет изменений, повторная проверка через 10 минут'
+NEXT_CHECK = 'Нет изменений, повторная проверка через 10 минут'
 RUNTIME_ERROR = 'Сбой в работе программы: {error}'
+SEND_MESSAGE_SUCCESSFUL = 'Сообщение {message} успешно отправлено'
 
 
 def send_message(bot, message):
@@ -83,7 +86,11 @@ def get_api_answer(timestamp):
     for error in ['error', 'code']:
         if error in response:
             raise ResponseError(
-                RESPONSE_ERROR.format(error=error, **request_params)
+                RESPONSE_ERROR.format(
+                    error=error,
+                    error_detail=response[error],
+                    **request_params
+                )
             )
     return response
 
@@ -116,32 +123,34 @@ def check_tokens():
     """Проверка токенов."""
     check_tokens = [logging.critical(TOKEN_ERROR.format(token=token))
                     for token in TOKENS if globals()[token] is None]
-    if check_tokens:
-        return False
-    return True
+    return not bool(check_tokens)
 
 
 def main():
     """Основная логика работы бота."""
     if not check_tokens():
         logging.critical(NO_TOKEN_ERROR)
-        raise KeyError(NO_TOKEN_ERROR)
+        raise ValueError(NO_TOKEN_ERROR)
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
+    errors = ''
     while True:
         try:
             response = get_api_answer(current_timestamp)
             homeworks = check_response(response)
             if homeworks:
                 message = parse_status(homeworks[0])
+                logging.info(SEND_MESSAGE_SUCCESSFUL.format(message=message))
                 send_message(bot, message)
                 current_timestamp = response.get(
                     'current_date', current_timestamp)
-            logging.info(NO_CHANGES)
+            logging.info(NEXT_CHECK)
         except Exception as error:
             message = RUNTIME_ERROR.format(error=error)
             logging.error(message)
-            send_message(bot, message)
+            if errors != message:
+                if send_message(bot, message):
+                    errors = message
         time.sleep(RETRY_TIME)
 
 
