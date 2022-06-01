@@ -138,7 +138,7 @@ def main():
             homeworks = check_response(response)
             if homeworks:
                 send_message(bot, parse_status(homeworks[0]))
-                logging.info(SEND_MESSAGE_SUCCESSFULL.format(message=message))
+                logging.info(SEND_MESSAGE_SUCCESSFULL)
             current_timestamp = response.get(
                 'current_date', current_timestamp)
             logging.info(NEXT_CHECK)
